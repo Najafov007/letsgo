@@ -1,0 +1,29 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{{template "title" .}} - Snippetbox</title>
+            <!-- Link to the favicon and CSS file-->
+         <link rel="stylesheet" href="/static/css/main.css">
+         <link rel="shortcut icon" href="/static/img/favicon.ico" type="image/x-icon">
+            <!-- Also link to the font by Google-->
+        <link rel="stylesheet" href="https://www.googleapis.com/css?family=Ubuntu+Mono:400,700">
+    </head>
+    <body>
+        <header>
+            <h1><a href="/">Snippetbox</a></h1>
+        </header>
+        <!-- Invoke the navigation from partials-->
+        {{template "nav" .}}
+        <main>
+            {{template "main" .}}
+        </main>
+        <footer>Powered by <a href="https://go.dev/">Go</a> in {{.CurrentYear}}
+        </footer>
+            <!--Also link our javascript-->
+        <script src="/static/js/main.js" type="text/javascript"></script>
+        
+    </body>
+</html>
+{{end}}
