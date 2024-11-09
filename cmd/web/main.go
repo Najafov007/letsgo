@@ -24,6 +24,7 @@ type application struct {
 	templateCache 	map[string]*template.Template
 	formDecoder 	*form.Decoder
 	sessionManager 	*scs.SessionManager
+	users 			*models.UserModel
 }
 
 func main () {
@@ -55,17 +56,18 @@ func main () {
 	sessionManager.Cookie.Secure = true
 
 	app := &application {
-		logger: logger,
-		snippets: &models.SnippetModel{DB: db},
-		templateCache: templateCache,
-		formDecoder: formDecoder,
+		logger: 		logger,
+		snippets: 		&models.SnippetModel{DB: db},
+		templateCache: 	templateCache,
+		formDecoder: 	formDecoder,
 		sessionManager: sessionManager,
+		users: 			&models.UserModel{DB: db},
 	}
 
 	tlsConfig := &tls.Config{
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
-	
+
 	srv := &http.Server{
 		Addr: *addr,
 		Handler: app.routes(),
