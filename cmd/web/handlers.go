@@ -26,10 +26,6 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	data.Snippets = snippets
 	
 	app.render(w, r, http.StatusOK, "home.html", data)
-
-	// app.render(w, r, http.StatusOK, "home.html", templateData{
-	// 	Snippets: snippets,
-	// })
 }
 
 // Page for view snippet
@@ -159,7 +155,6 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in!")
 
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
-
 }
 
 type userLoginForm struct {
@@ -217,7 +212,6 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 	
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
-
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
@@ -232,4 +226,8 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "flash", "You have been successfully logged out")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
 }
