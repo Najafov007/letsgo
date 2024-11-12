@@ -16,6 +16,9 @@ func (app *application) routes() http.Handler {
 	// Unprotected route
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticated)
 
+	// Route for testing
+	mux.HandleFunc("GET /ping", ping)
+
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
 	mux.Handle("GET /snippet/view/{id}", dynamic.ThenFunc(app.SnippetView))
 	mux.Handle("GET /user/signup", dynamic.ThenFunc(app.userSignup))
