@@ -2,6 +2,7 @@ package assert
 
 import (
 	"testing"
+	"strings"
 )
 
 func Equal[T comparable](t *testing.T, actual, expected T) {
@@ -9,5 +10,13 @@ func Equal[T comparable](t *testing.T, actual, expected T) {
 
 	if actual != expected {
 		t.Errorf("Got %v, Expected %v", actual, expected)
+	}
+}
+
+func StringContains(t *testing.T, actual, expectedSubstring string) {
+	t.Helper()
+
+	if !strings.Contains(actual, expectedSubstring) {
+		t.Errorf("Got: %q, Expected: %q", actual, expectedSubstring)
 	}
 }

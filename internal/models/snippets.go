@@ -80,4 +80,10 @@ func (m *SnippetModel) Latest() ([]Snippet, error) {
 		return nil, err
 	}
 	return snippets, nil
-}	
+}
+
+type SnippetModelInterface interface {
+	Insert(title string, content string, expires int) (int, error)
+	Get(id int) (Snippet, error)
+	Latest() ([]Snippet, error)
+}
