@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"snippetbox.nijat.net/internal/assert"
+
+	"net/url"
 )
 
 func TestPing(t *testing.T) {
@@ -73,3 +75,121 @@ func TestSnippetView(t *testing.T) {
 		})
 	}
 }
+
+func TestUserSignup(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	_, _, body := ts.get(t, "/user/signup")
+	validcsrfToken := extractCSRFToken(t, body)
+
+	const (
+		validName		= "Nijat"
+		validPassword	= "nijat007"
+		validEmail		= "nijat@example.com"
+		formTag			= `<form action="/user/signup" method="POST" novalidate>`
+	)
+
+	tests := []struct {
+		name 			string
+		userName 		string
+		userEmail 		string
+		userPassword	string
+		csrfToken		string
+		wantCode		int
+		wantFormTag		string
+	
+	}{
+		{
+			name: "Valid Submission",
+			userName: validName,
+			userEmail: validEmail,
+			userPassword: validPassword,
+			csrfToken: validcsrfToken,
+			wantCode: http.StatusSeeOther,
+		},
+		{
+			name: "Invalid CSRF Token",
+			userName: validName,
+			userEmail: validEmail,
+			userPassword: validPassword,
+			csrfToken: "wrongToken",
+			wantCode: http.StatusBadRequest,
+		},
+
+		{
+			name: "Empty Name",
+			userName: "",
+			userEmail: validEmail,
+			userPassword: validPassword,
+			csrfToken: validcsrfToken,
+			wantCode: http.StatusUnprocessableEntity,
+			wantFormTag: formTag,
+		},
+
+		{
+			name: "Empty Mail",
+			userName: validName,
+			userEmail: "",
+			userPassword: validPassword,
+			csrfToken: validcsrfToken,
+			wantCode: http.StatusUnprocessableEntity,
+			wantFormTag: formTag,
+		},
+		{
+			name: "Empty Password",
+			userName: validName,
+			userEmail: validEmail,
+			userPassword: "",
+			csrfToken: validcsrfToken,
+			wantCode: http.StatusUnprocessableEntity,
+			wantFormTag: formTag,
+		},
+		{
+			name: "Invalid Email",
+			userName: validName,
+			userEmail: "nijat@example.",
+			userPassword: validPassword,
+			csrfToken: validcsrfToken,
+			wantCode: http.StatusUnprocessableEntity,
+			wantFormTag: formTag,
+		},
+		{
+			name: "Short Password",
+			userName: validName,
+			userEmail: validEmail,
+			userPassword: "nija",
+			csrfToken: validcsrfToken,
+			wantCode: http.StatusUnprocessableEntity,
+			wantFormTag: formTag,
+		},
+		{
+			name: "Duplicated Email",
+			userName: validName,
+			userEmail: "dupe@example.com",
+			userPassword: validPassword,
+			csrfToken: validcsrfToken,
+			wantCode: http.StatusUnprocessableEntity,
+			wantFormTag: formTag,
+		},
+	}
+		for _, tt := range tests {
+			t.Run(tt.name, func (t *testing.T)  {
+				form := url.Values{}
+				form.Add("name", tt.userName)
+				form.Add("email", tt.userEmail)
+				form.Add("password", tt.userPassword)
+				form.Add("csrf_token", tt.csrfToken)
+				form.Add("name", tt.userName)
+				code, _, body := ts.postForm(t, "/user/signup", form)
+				
+				assert.Equal(t, code, tt.wantCode)
+	
+				if tt.wantFormTag != "" {
+					assert.StringContains(t, body, tt.wantFormTag)
+					}
+				})
+		}
+
+	}

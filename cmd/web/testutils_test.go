@@ -5,9 +5,13 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"net/http/cookiejar"
 	"net/http/httptest"
 	"testing"
+
+	"html"
+	"regexp"
 
 	"time"
 
@@ -69,6 +73,33 @@ func (ts *testServer) get(t *testing.T, urlPath string) (int, http.Header, strin
 	if err != nil {
 		t.Fatal(err)
 	}
+	body = bytes.TrimSpace(body)
+
+	return result.StatusCode, result.Header, string(body)
+}
+
+var csrfTokenRX = regexp.MustCompile(`<input type="hidden" name="csrf_token" value="(.+)">`)
+
+func extractCSRFToken(t *testing.T, body string) string {
+	matches := csrfTokenRX.FindStringSubmatch(body)
+	if len(matches) < 2 {
+		t.Fatal("No CSRF_TOKEN found in the body")
+	}
+	return html.UnescapeString(string(matches[1]))
+}
+
+func (ts *testServer) postForm(t *testing.T, urlPath string, form url.Values) (int, http.Header, string) {
+	result, err := ts.Client().PostForm(ts.URL+urlPath, form)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer result.Body.Close()
+	body, err := io.ReadAll(result.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	body = bytes.TrimSpace(body)
 
 	return result.StatusCode, result.Header, string(body)
