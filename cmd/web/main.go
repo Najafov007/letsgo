@@ -25,11 +25,13 @@ type application struct {
 	formDecoder 	*form.Decoder
 	sessionManager 	*scs.SessionManager
 	users 			models.UserModelInterface
+	debug			bool
 }
 
 func main () {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	dsn := flag.String("dsn", "web:nijat007@/snippetbox?parseTime=true", "MySQL Data Source Name")
+	debug := flag.Bool("debug", false, "Enable debug mode")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -62,6 +64,7 @@ func main () {
 		formDecoder: 	formDecoder,
 		sessionManager: sessionManager,
 		users: 			&models.UserModel{DB: db},
+		debug: 			*debug,	
 	}
 
 	tlsConfig := &tls.Config{
